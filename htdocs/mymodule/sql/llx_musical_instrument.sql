@@ -11,5 +11,22 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
 
+
+CREATE TABLE llx_instruments (
+    rowid INTEGER AUTO_INCREMENT PRIMARY KEY,
+
+    name VARCHAR(60) NOT NULL,
+    serial VARCHAR(20) NOT NULL,
+    price DOUBLE(24,8),
+
+    entity INTEGER default 1,
+    date_creation datetime,
+    tms timestamp,
+    date_valid datetime,
+    import_key VARCHAR(20),
+    fk_user_creat INTEGER,
+    fk_user_modif INTEGER,
+    fk_user_valid INTEGER
+)
