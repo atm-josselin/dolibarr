@@ -5772,7 +5772,8 @@ class Form
 	 */
     public function selectForFormsList($objecttmp, $htmlname, $preselectedvalue, $showempty = '', $searchkey = '', $placeholder = '', $morecss = '', $moreparams = '', $forcecombo = 0, $outputmode = 0)
 	{
-		global $conf, $langs, $user;
+		global $conf, $langs, $user, $hookmanager;
+		$hookmanager->initHooks(array('commonobject'));
 
 		$prefixforautocompletemode=$objecttmp->element;
 		if ($prefixforautocompletemode == 'societe') $prefixforautocompletemode='company';
@@ -5808,6 +5809,11 @@ class Form
 		if ($searchkey != '') $sql.=natural_search(explode(',', $fieldstoshow), $searchkey);
 		if ($objecttmp->ismultientitymanaged == 2)
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND t.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+
+		$parameters=array();
+		$reshook=$hookmanager->executeHooks('printFieldListWhere', $parameters, $objecttmp);    // Note that $action and $object may have been modified by hook
+		$sql.=$hookmanager->resPrint;
+
 		$sql.=$this->db->order($fieldstoshow, "ASC");
 		//$sql.=$this->db->plimit($limit, 0);
 
