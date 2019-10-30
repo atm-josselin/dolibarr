@@ -331,7 +331,7 @@ class FormTicket
                 $selectedCompany = ($this->withfromsocid > 0) ? $this->withfromsocid : -1;
                 $nbofcontacts = $form->select_contacts($selectedCompany, $this->withfromcontactid, 'contactid', 3, '', '', 0, 'minwidth200');
                 print ' ';
-                $formcompany->selectTypeContact($ticketstatic, '', 'type', 'external', '', 0, 'maginleftonly');
+                $formcompany->selectTypeContact($ticketstatic, $this->withfromcontactrole, 'type', 'external', '', 0, 'maginleftonly');
                 print '</td></tr>';
             } else {
                 print '<tr><td class="titlefield"><input type="hidden" name="socid" value="' . $user->socid . '"/></td>';

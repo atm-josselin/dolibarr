@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) - 2013-2016     Jean-François FERRY    <hello@librethic.io>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,7 +18,7 @@
 
 /**
  *    \file     htdocs/ticket/agenda.php
- *    \ingroup	ticket
+ *    \ingroup    ticket
  */
 
 require '../main.inc.php';
@@ -39,7 +40,7 @@ $msg_id = GETPOST('msg_id', 'int');
 $action = GETPOST('action', 'aZ09');
 
 if ($user->societe_id) {
-    $socid = $user->societe_id;
+	$socid = $user->societe_id;
 }
 
 // Security check
@@ -70,7 +71,7 @@ $tickesupstatic = new Ticket($db);
 
 llxHeader('', $langs->trans('TicketsIndex'), '');
 
-$linkback='';
+$linkback = '';
 print load_fiche_titre($langs->trans('TicketsIndex'), $linkback, 'title_ticket.png');
 
 
@@ -84,22 +85,22 @@ $param_shownb = 'DOLUSERCOOKIE_ticket_by_status_shownb';
 $param_showtot = 'DOLUSERCOOKIE_ticket_by_status_showtot';
 $autosetarray = preg_split("/[,;:]+/", GETPOST('DOL_AUTOSET_COOKIE'));
 if (in_array('DOLUSERCOOKIE_ticket_by_status', $autosetarray)) {
-    $endyear = GETPOST($param_year, 'int');
-    $shownb = GETPOST($param_shownb, 'alpha');
-    $showtot = GETPOST($param_showtot, 'alpha');
+	$endyear = GETPOST($param_year, 'int');
+	$shownb = GETPOST($param_shownb, 'alpha');
+	$showtot = GETPOST($param_showtot, 'alpha');
 } else {
-    $tmparray = json_decode($_COOKIE['DOLUSERCOOKIE_ticket_by_status'], true);
-    $endyear = $tmparray['year'];
-    $shownb = $tmparray['shownb'];
-    $showtot = $tmparray['showtot'];
+	$tmparray = json_decode($_COOKIE['DOLUSERCOOKIE_ticket_by_status'], true);
+	$endyear = $tmparray['year'];
+	$shownb = $tmparray['shownb'];
+	$showtot = $tmparray['showtot'];
 }
 if (empty($shownb) && empty($showtot)) {
-    $showtot = 1;
+	$showtot = 1;
 }
 
 $nowarray = dol_getdate(dol_now(), true);
 if (empty($endyear)) {
-    $endyear = $nowarray['year'];
+	$endyear = $nowarray['year'];
 }
 
 $startyear = $endyear - 1;
@@ -112,80 +113,80 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
  * Statistics area
  */
 $tick = array(
-    'unread' => 0,
-    'read' => 0,
-    'answered' => 0,
-    'assigned' => 0,
-    'inprogress' => 0,
-    'waiting' => 0,
-    'closed' => 0,
-    'deleted' => 0,
+	'unread' => 0,
+	'read' => 0,
+	'answered' => 0,
+	'assigned' => 0,
+	'inprogress' => 0,
+	'waiting' => 0,
+	'closed' => 0,
+	'deleted' => 0,
 );
 
 $sql = "SELECT t.fk_statut, COUNT(t.fk_statut) as nb";
 $sql .= " FROM " . MAIN_DB_PREFIX . "ticket as t";
 if (!$user->rights->societe->client->voir && !$socid) {
-    $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+	$sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
 }
 $sql .= ' WHERE t.entity IN (' . getEntity('ticket') . ')';
 $sql .= dolSqlDateFilter('datec', 0, 0, $endyear);
 
 if (!$user->rights->societe->client->voir && !$socid) {
-    $sql .= " AND t.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+	$sql .= " AND t.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
 }
 
 // External users restriction
 if ($user->societe_id > 0) {
-    $sql .= " AND t.fk_soc='" . $user->societe_id . "'";
+	$sql .= " AND t.fk_soc='" . $user->societe_id . "'";
 } else {
-    // For internals users,
-    if (!empty($conf->global->TICKET_LIMIT_VIEW_ASSIGNED_ONLY) && !$user->rights->ticket->manage) {
-        $sql .= " AND t.fk_user_assign=" . $user->id;
-    }
+	// For internals users,
+	if (!empty($conf->global->TICKET_LIMIT_VIEW_ASSIGNED_ONLY) && !$user->rights->ticket->manage) {
+		$sql .= " AND t.fk_user_assign=" . $user->id;
+	}
 }
 $sql .= " GROUP BY t.fk_statut";
 
 $result = $db->query($sql);
 if ($result) {
-    while ($objp = $db->fetch_object($result)) {
-        $found = 0;
-        if ($objp->fk_statut == Ticket::STATUS_NOT_READ) {
-            $tick['unread'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_READ) {
-            $tick['read'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_NEED_MORE_INFO) {
-        	$tick['needmoreinfo'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_ASSIGNED) {
-            $tick['assigned'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_IN_PROGRESS) {
-            $tick['inprogress'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_WAITING) {
-            $tick['waiting'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_CLOSED) {
-            $tick['closed'] = $objp->nb;
-        }
-        if ($objp->fk_statut == Ticket::STATUS_CANCELED) {
-            $tick['canceled'] = $objp->nb;
-        }
-    }
+	while ($objp = $db->fetch_object($result)) {
+		$found = 0;
+		if ($objp->fk_statut == Ticket::STATUS_NOT_READ) {
+			$tick['unread'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_READ) {
+			$tick['read'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_NEED_MORE_INFO) {
+			$tick['needmoreinfo'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_ASSIGNED) {
+			$tick['assigned'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_IN_PROGRESS) {
+			$tick['inprogress'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_WAITING) {
+			$tick['waiting'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_CLOSED) {
+			$tick['closed'] = $objp->nb;
+		}
+		if ($objp->fk_statut == Ticket::STATUS_CANCELED) {
+			$tick['canceled'] = $objp->nb;
+		}
+	}
 
-    $dataseries = array();
-    $dataseries[] = array('label' => $langs->trans("Unread"), 'data' => round($tick['unread']));
-    $dataseries[] = array('label' => $langs->trans("Read"), 'data' => round($tick['read']));
-    $dataseries[] = array('label' => $langs->trans("NeedMoreInformation"), 'data' => round($tick['needmoreinfo']));
-    $dataseries[] = array('label' => $langs->trans("Assigned"), 'data' => round($tick['assigned']));
-    $dataseries[] = array('label' => $langs->trans("InProgress"), 'data' => round($tick['inprogress']));
-    $dataseries[] = array('label' => $langs->trans("Waiting"), 'data' => round($tick['waiting']));
-    $dataseries[] = array('label' => $langs->trans("Closed"), 'data' => round($tick['closed']));
-    $dataseries[] = array('label' => $langs->trans("Canceled"), 'data' => round($tick['canceled']));
+	$dataseries = array();
+	$dataseries[] = array('label' => $langs->trans("Unread"), 'data' => round($tick['unread']));
+	$dataseries[] = array('label' => $langs->trans("Read"), 'data' => round($tick['read']));
+	$dataseries[] = array('label' => $langs->trans("NeedMoreInformation"), 'data' => round($tick['needmoreinfo']));
+	$dataseries[] = array('label' => $langs->trans("Assigned"), 'data' => round($tick['assigned']));
+	$dataseries[] = array('label' => $langs->trans("InProgress"), 'data' => round($tick['inprogress']));
+	$dataseries[] = array('label' => $langs->trans("Waiting"), 'data' => round($tick['waiting']));
+	$dataseries[] = array('label' => $langs->trans("Closed"), 'data' => round($tick['closed']));
+	$dataseries[] = array('label' => $langs->trans("Canceled"), 'data' => round($tick['canceled']));
 } else {
-    dol_print_error($db);
+	dol_print_error($db);
 }
 
 $stringtoshow = '<script type="text/javascript" language="javascript">
@@ -211,44 +212,44 @@ print '<tr><td class="center">';
 print $stringtoshow;
 
 // don't display graph if no series
-if (! empty($dataseries) && count($dataseries) > 1) {
-	$totalnb=0;
+if (!empty($dataseries) && count($dataseries) > 1) {
+	$totalnb = 0;
 	foreach ($dataseries as $key => $value) {
 		$totalnb += $value['data'];
 	}
 
 	$data = array();
-    foreach ($dataseries as $key => $value) {
-        $data[] = array($value['label'], $value['data']);
-    }
-    $px1 = new DolGraph();
-    $mesg = $px1->isGraphKo();
-    if (!$mesg) {
-        $px1->SetData($data);
-        unset($data1);
-        $px1->SetPrecisionY(0);
-        $i = $startyear;
-        $legend = array();
-        while ($i <= $endyear) {
-            $legend[] = $i;
-            $i++;
-        }
-        $px1->SetType(array('pie'));
-        $px1->SetLegend($legend);
-        $px1->SetMaxValue($px1->GetCeilMaxValue());
-        $px1->SetWidth($WIDTH);
-        $px1->SetHeight($HEIGHT);
-        $px1->SetYLabel($langs->trans("TicketStatByStatus"));
-        $px1->SetShading(3);
-        $px1->SetHorizTickIncrement(1);
-        $px1->SetPrecisionY(0);
-        $px1->SetCssPrefix("cssboxes");
-        $px1->mode = 'depth';
-        //$px1->SetTitle($langs->trans("TicketStatByStatus"));
+	foreach ($dataseries as $key => $value) {
+		$data[] = array($value['label'], $value['data']);
+	}
+	$px1 = new DolGraph();
+	$mesg = $px1->isGraphKo();
+	if (!$mesg) {
+		$px1->SetData($data);
+		unset($data1);
+		$px1->SetPrecisionY(0);
+		$i = $startyear;
+		$legend = array();
+		while ($i <= $endyear) {
+			$legend[] = $i;
+			$i++;
+		}
+		$px1->SetType(array('pie'));
+		$px1->SetLegend($legend);
+		$px1->SetMaxValue($px1->GetCeilMaxValue());
+		$px1->SetWidth($WIDTH);
+		$px1->SetHeight($HEIGHT);
+		$px1->SetYLabel($langs->trans("TicketStatByStatus"));
+		$px1->SetShading(3);
+		$px1->SetHorizTickIncrement(1);
+		$px1->SetPrecisionY(0);
+		$px1->SetCssPrefix("cssboxes");
+		$px1->mode = 'depth';
+		//$px1->SetTitle($langs->trans("TicketStatByStatus"));
 
-        $px1->draw($filenamenb, $fileurlnb);
-        print $px1->show($totalnb?0:1);
-    }
+		$px1->draw($filenamenb, $fileurlnb);
+		print $px1->show($totalnb ? 0 : 1);
+	}
 }
 print '</td></tr>';
 
@@ -273,22 +274,22 @@ $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "c_ticket_type as type ON type.code=t.t
 $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "c_ticket_category as category ON category.code=t.category_code";
 $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "c_ticket_severity as severity ON severity.code=t.severity_code";
 if (!$user->rights->societe->client->voir && !$socid) {
-    $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+	$sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
 }
 
 $sql .= ' WHERE t.entity IN (' . getEntity('ticket') . ')';
 $sql .= " AND t.fk_statut=0";
 if (!$user->rights->societe->client->voir && !$socid) {
-    $sql .= " AND t.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
+	$sql .= " AND t.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
 }
 
 if ($user->societe_id > 0) {
-    $sql .= " AND t.fk_soc='" . $user->societe_id . "'";
+	$sql .= " AND t.fk_soc='" . $user->societe_id . "'";
 } else {
-    // Restricted to assigned user only
-    if ($conf->global->TICKET_LIMIT_VIEW_ASSIGNED_ONLY && !$user->rights->ticket->manage) {
-        $sql .= " AND t.fk_user_assign=" . $user->id;
-    }
+	// Restricted to assigned user only
+	if ($conf->global->TICKET_LIMIT_VIEW_ASSIGNED_ONLY && !$user->rights->ticket->manage) {
+		$sql .= " AND t.fk_user_assign=" . $user->id;
+	}
 }
 $sql .= $db->order("t.datec", "DESC");
 $sql .= $db->plimit($max, 0);
@@ -296,78 +297,78 @@ $sql .= $db->plimit($max, 0);
 //print $sql;
 $result = $db->query($sql);
 if ($result) {
-    $num = $db->num_rows($result);
+	$num = $db->num_rows($result);
 
-    $i = 0;
+	$i = 0;
 
-    $transRecordedType = $langs->trans("LatestNewTickets", $max);
+	$transRecordedType = $langs->trans("LatestNewTickets", $max);
 
-    print '<div class="div-table-responsive-no-min">';
-    print '<table class="noborder" width="100%">';
-    print '<tr class="liste_titre"><th colspan="5">' . $transRecordedType . '</th>';
-    print '<th class="right" colspan="2"><a href="'.DOL_URL_ROOT.'/ticket/list.php?search_fk_statut[]='.Ticket::STATUS_NOT_READ.'">'.$langs->trans("FullList").'</th>';
-    print '</tr>';
-    if ($num > 0) {
+	print '<div class="div-table-responsive-no-min">';
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre"><th colspan="5">' . $transRecordedType . '</th>';
+	print '<th class="right" colspan="2"><a href="' . DOL_URL_ROOT . '/ticket/list.php?search_fk_statut[]=' . Ticket::STATUS_NOT_READ . '">' . $langs->trans("FullList") . '</th>';
+	print '</tr>';
+	if ($num > 0) {
 
-        while ($i < $num) {
-            $objp = $db->fetch_object($result);
+		while ($i < $num) {
+			$objp = $db->fetch_object($result);
 
-            $tickesupstatic->id = $objp->rowid;
-            $tickesupstatic->ref = $objp->ref;
-            $tickesupstatic->track_id = $objp->track_id;
-            $tickesupstatic->fk_statut = $objp->fk_statut;
-            $tickesupstatic->progress = $objp->progress;
-            $tickesupstatic->subject = $objp->subject;
+			$tickesupstatic->id = $objp->rowid;
+			$tickesupstatic->ref = $objp->ref;
+			$tickesupstatic->track_id = $objp->track_id;
+			$tickesupstatic->fk_statut = $objp->fk_statut;
+			$tickesupstatic->progress = $objp->progress;
+			$tickesupstatic->subject = $objp->subject;
 
-            print '<tr class="oddeven">';
+			print '<tr class="oddeven">';
 
-            // Ref
-            print '<td class="nowrap">';
-            print $tickesupstatic->getNomUrl(1);
-            print "</td>\n";
+			// Ref
+			print '<td class="nowrap">';
+			print $tickesupstatic->getNomUrl(1);
+			print "</td>\n";
 
-            // Creation date
-            print '<td class="left">';
-            print dol_print_date($db->jdate($objp->datec), 'dayhour');
-            print "</td>";
+			// Creation date
+			print '<td class="left">';
+			print dol_print_date($db->jdate($objp->datec), 'dayhour');
+			print "</td>";
 
-            // Subject
-            print '<td class="nowrap">';
-            print '<a href="card.php?track_id=' . $objp->track_id . '">' . dol_trunc($objp->subject, 30) . '</a>';
-            print "</td>\n";
+			// Subject
+			print '<td class="nowrap">';
+			print '<a href="card.php?track_id=' . $objp->track_id . '">' . dol_trunc($objp->subject, 30) . '</a>';
+			print "</td>\n";
 
-            // Type
-            print '<td class="nowrap">';
-            print $objp->type_label;
-            print '</td>';
+			// Type
+			print '<td class="nowrap">';
+			print $objp->type_label;
+			print '</td>';
 
-            // Category
-            print '<td class="nowrap">';
-            print $objp->category_label;
-            print "</td>";
+			// Category
+			print '<td class="nowrap">';
+			print $objp->category_label;
+			print "</td>";
 
-            // Severity
-            print '<td class="nowrap">';
-            print $objp->severity_label;
-            print "</td>";
+			// Severity
+			print '<td class="nowrap">';
+			print $objp->severity_label;
+			print "</td>";
 
-            print '<td class="nowrap right">';
-            print $tickesupstatic->getLibStatut(5);
-            print "</td>";
+			print '<td class="nowrap right">';
+			print $tickesupstatic->getLibStatut(5);
+			print "</td>";
 
-            print "</tr>\n";
-            $i++;
-        }
+			print "</tr>\n";
+			$i++;
+		}
 
-        $db->free();
-    } else {
-        print '<tr><td colspan="6" class="opacitymedium">' . $langs->trans('NoUnreadTicketsFound') . '</td></tr>';
-    }
+		$db->free();
+	} else {
+		print '<tr><td colspan="6" class="opacitymedium">' . $langs->trans('NoUnreadTicketsFound') . '</td></tr>';
+	}
 
-    print "</table>";
-    print '</div>';
+	print "</table>";
+	print '</div>';
 } else {
-    dol_print_error($db);
+	dol_print_error($db);
 }
 
 print '</div></div></div>';
